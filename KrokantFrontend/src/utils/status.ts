@@ -44,3 +44,52 @@ export function formatDate(date: string) {
 
   return new Intl.DateTimeFormat("ru-RU").format(new Date(date));
 }
+
+export function taskProgress(status: TaskStatus) {
+  if (status === "DONE") {
+    return 100;
+  }
+
+  if (status === "IN_PROGRESS") {
+    return 55;
+  }
+
+  if (status === "OVERDUE") {
+    return 25;
+  }
+
+  return 12;
+}
+
+export function daysUntilDeadline(date: string) {
+  if (!date) {
+    return null;
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const deadline = new Date(date);
+  deadline.setHours(0, 0, 0, 0);
+
+  const msInDay = 24 * 60 * 60 * 1000;
+  return Math.ceil((deadline.getTime() - today.getTime()) / msInDay);
+}
+
+export function deadlineProgress(date: string, status: TaskStatus) {
+  if (status === "DONE") {
+    return 100;
+  }
+
+  const daysLeft = daysUntilDeadline(date);
+  if (daysLeft === null) {
+    return 0;
+  }
+
+  if (daysLeft <= 0) {
+    return 100;
+  }
+
+  const period = 30;
+  return Math.min(95, Math.max(8, Math.round(((period - daysLeft) / period) * 100)));
+}

@@ -50,7 +50,6 @@ export function TaskForm({ onCreated }: Props) {
     <section className="page-section narrow">
       <div className="section-title">
         <div>
-          <p className="muted small">Для руководителя</p>
           <h2>Создать задачу</h2>
         </div>
       </div>

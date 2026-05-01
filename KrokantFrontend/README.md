@@ -9,7 +9,8 @@ npm install
 npm run dev
 ```
 
-По умолчанию используются моковые данные.
+При `npm run dev` используются моковые данные.
+При `npm run build` frontend обращается к backend API.
 
 Тестовые пользователи для моков:
 
@@ -17,9 +18,9 @@ npm run dev
 - `anna@uni.ru` / `123456` - преподаватель
 - `oleg@uni.ru` / `123456` - преподаватель
 
-## Переключение на backend
+## Переключение API
 
-Создайте `.env`:
+Для локальной работы с настоящим backend создайте `.env.local`:
 
 ```env
 VITE_USE_MOCKS=false

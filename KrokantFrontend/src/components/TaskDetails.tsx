@@ -2,7 +2,15 @@ import { FormEvent, useEffect, useState } from "react";
 import { ArrowLeft, CalendarClock, Save } from "lucide-react";
 import { api } from "../api/client";
 import type { Task, TaskStatus, User } from "../types";
-import { formatDate, nextStatuses, statusLabels, visibleStatus } from "../utils/status";
+import {
+  daysUntilDeadline,
+  deadlineProgress,
+  formatDate,
+  nextStatuses,
+  statusLabels,
+  taskProgress,
+  visibleStatus
+} from "../utils/status";
 
 type Props = {
   taskId: string;
@@ -110,6 +118,9 @@ export function TaskDetails({ taskId, currentUser, onBack, onChanged }: Props) {
   }
 
   const statusView = visibleStatus(task);
+  const workPercent = taskProgress(statusView);
+  const deadlinePercent = deadlineProgress(task.deadline, statusView);
+  const daysLeft = daysUntilDeadline(task.deadline);
 
   return (
     <section className="page-section narrow">
@@ -125,6 +136,31 @@ export function TaskDetails({ taskId, currentUser, onBack, onChanged }: Props) {
         <div className="task-meta">
           <span>{task.assigneeName}</span>
           <span>до {formatDate(task.deadline)}</span>
+        </div>
+        <div className="detail-progress">
+          <div className="progress-row">
+            <span>Выполнение</span>
+            <strong>{workPercent}%</strong>
+            <div className="progress-track">
+              <div className="progress-fill progress" style={{ width: `${workPercent}%` }} />
+            </div>
+          </div>
+          <div className="progress-row">
+            <span>Срок</span>
+            <strong>
+              {daysLeft === null
+                ? "нет срока"
+                : daysLeft < 0
+                  ? `${Math.abs(daysLeft)} дн. просрочки`
+                  : `${daysLeft} дн. осталось`}
+            </strong>
+            <div className="progress-track">
+              <div
+                className={`progress-fill ${statusView === "OVERDUE" ? "danger" : "deadline"}`}
+                style={{ width: `${deadlinePercent}%` }}
+              />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -193,7 +229,6 @@ export function TaskDetails({ taskId, currentUser, onBack, onChanged }: Props) {
             value={comment}
             onChange={(event) => setComment(event.target.value)}
             rows={3}
-            placeholder="Например: нужно согласование с партнером"
           />
         </label>
         <button className="secondary" type="submit">

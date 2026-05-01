@@ -2,7 +2,14 @@ import { FormEvent, useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { api } from "../api/client";
 import type { Task, User } from "../types";
-import { formatDate, statusLabels, visibleStatus } from "../utils/status";
+import {
+  daysUntilDeadline,
+  deadlineProgress,
+  formatDate,
+  statusLabels,
+  taskProgress,
+  visibleStatus
+} from "../utils/status";
 
 type Props = {
   currentUser: User;
@@ -104,11 +111,39 @@ export function TaskList({ currentUser, refreshKey, onSelectTask }: Props) {
       <div className="task-grid">
         {tasks.map((task) => {
           const statusView = visibleStatus(task);
+          const daysLeft = daysUntilDeadline(task.deadline);
+          const deadlinePercent = deadlineProgress(task.deadline, statusView);
+          const workPercent = taskProgress(statusView);
           return (
             <button className="task-card" key={task.id} onClick={() => onSelectTask(task.id)}>
               <span className={`badge ${statusView.toLowerCase()}`}>{statusLabels[statusView]}</span>
               <h3>{task.title}</h3>
               <p>{task.description}</p>
+              <div className="task-progress">
+                <div className="task-progress-row">
+                  <span>Выполнение</span>
+                  <b>{workPercent}%</b>
+                </div>
+                <div className="progress-track">
+                  <div className="progress-fill progress" style={{ width: `${workPercent}%` }} />
+                </div>
+                <div className="task-progress-row">
+                  <span>Срок</span>
+                  <b>
+                    {daysLeft === null
+                      ? "нет"
+                      : daysLeft < 0
+                        ? `${Math.abs(daysLeft)} дн. проср.`
+                        : `${daysLeft} дн.`}
+                  </b>
+                </div>
+                <div className="progress-track">
+                  <div
+                    className={`progress-fill ${statusView === "OVERDUE" ? "danger" : "deadline"}`}
+                    style={{ width: `${deadlinePercent}%` }}
+                  />
+                </div>
+              </div>
               <div className="task-meta">
                 <span>{task.assigneeName}</span>
                 <span>{formatDate(task.deadline)}</span>
