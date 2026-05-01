@@ -6,8 +6,8 @@ type Props = {
 };
 
 export function LoginPage({ onLogin }: Props) {
-  const [email, setEmail] = useState("head@uni.ru");
-  const [password, setPassword] = useState("123456");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -33,7 +33,13 @@ export function LoginPage({ onLogin }: Props) {
 
         <label>
           Email
-          <input value={email} onChange={(event) => setEmail(event.target.value)} />
+          <input
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            autoComplete="email"
+            required
+          />
         </label>
 
         <label>
@@ -42,6 +48,8 @@ export function LoginPage({ onLogin }: Props) {
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
+            autoComplete="current-password"
+            required
           />
         </label>
 
@@ -51,8 +59,6 @@ export function LoginPage({ onLogin }: Props) {
           <LogIn size={18} />
           {loading ? "Входим..." : "Войти"}
         </button>
-
-        <p className="hint">Для моков: head@uni.ru / 123456</p>
       </form>
     </main>
   );
