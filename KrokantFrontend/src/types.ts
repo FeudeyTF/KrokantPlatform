@@ -2,6 +2,8 @@ export type UserRole = "HEAD" | "TEACHER";
 
 export type TaskStatus = "NEW" | "IN_PROGRESS" | "DONE" | "OVERDUE";
 
+export type Priority = "HIGH" | "MEDIUM" | "LOW";
+
 export type User = {
   id: string;
   fullName: string;
@@ -9,11 +11,27 @@ export type User = {
   role: UserRole;
 };
 
+export type Comment = {
+  id: string;
+  authorId: string;
+  authorName: string;
+  text: string;
+  createdAt: string;
+};
+
+export type ActivityEntry = {
+  id: string;
+  actorName: string;
+  action: string;
+  createdAt: string;
+};
+
 export type Task = {
   id: string;
   title: string;
   description: string;
   status: TaskStatus;
+  priority: Priority;
   deadline: string;
   assigneeId: string;
   assigneeName: string;
@@ -21,6 +39,8 @@ export type Task = {
   createdByName: string;
   createdAt: string;
   updatedAt: string;
+  comments: Comment[];
+  activity: ActivityEntry[];
 };
 
 export type TaskListResponse = {
@@ -56,6 +76,8 @@ export type TaskFilters = {
   status?: string;
   assigneeId?: string;
   search?: string;
+  priority?: string;
+  sort?: "deadline_asc" | "deadline_desc" | "priority" | "created";
   page?: number;
   limit?: number;
 };

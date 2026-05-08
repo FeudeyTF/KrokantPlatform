@@ -1,19 +1,25 @@
 import { useEffect, useState } from "react";
-import { AlertTriangle, CheckCircle2, Clock3, ListTodo } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Clock3, ListTodo, CalendarDays, TrendingUp } from "lucide-react";
 import { api } from "../api/client";
-import type { DashboardSummary, WorkloadItem } from "../types";
+import type { DashboardSummary, Task, WorkloadItem } from "../types";
+import { daysUntilDeadline, formatDate, isOverdue, visibleStatus } from "../utils/status";
 
 const cards = [
-  { key: "totalTasks", label: "Всего задач", icon: ListTodo },
-  { key: "newTasks", label: "Новые", icon: Clock3 },
-  { key: "inProgressTasks", label: "В работе", icon: ListTodo },
-  { key: "doneTasks", label: "Готово", icon: CheckCircle2 },
-  { key: "overdueTasks", label: "Просрочено", icon: AlertTriangle }
+  { key: "totalTasks", label: "Всего задач", icon: ListTodo, color: "" },
+  { key: "newTasks", label: "Новые", icon: Clock3, color: "stat-new" },
+  { key: "inProgressTasks", label: "В работе", icon: TrendingUp, color: "stat-progress" },
+  { key: "doneTasks", label: "Готово", icon: CheckCircle2, color: "stat-done" },
+  { key: "overdueTasks", label: "Просрочено", icon: AlertTriangle, color: "stat-overdue" }
 ] as const;
 
-export function Dashboard() {
+type Props = {
+  onSelectTask: (id: string) => void;
+};
+
+export function Dashboard({ onSelectTask }: Props) {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [workload, setWorkload] = useState<WorkloadItem[]>([]);
+  const [upcoming, setUpcoming] = useState<Task[]>([]);
   const [error, setError] = useState("");
 
   const donePercent = summary?.totalTasks
@@ -27,10 +33,11 @@ export function Dashboard() {
     : 0;
 
   useEffect(() => {
-    Promise.all([api.getSummary(), api.getWorkload()])
-      .then(([summaryData, workloadData]) => {
+    Promise.all([api.getSummary(), api.getWorkload(), api.getUpcoming(7)])
+      .then(([summaryData, workloadData, upcomingData]) => {
         setSummary(summaryData);
         setWorkload(workloadData);
+        setUpcoming(upcomingData);
       })
       .catch((err) => setError(err instanceof Error ? err.message : "Ошибка загрузки"));
   }, []);
@@ -48,16 +55,30 @@ export function Dashboard() {
         </div>
       </div>
 
+      {/* Алерт о просрочках */}
+      {summary && summary.overdueTasks > 0 && (
+        <div className="overdue-banner">
+          <AlertTriangle size={18} />
+          <span>
+            <strong>{summary.overdueTasks}</strong>{" "}
+            {summary.overdueTasks === 1 ? "задача просрочена" : summary.overdueTasks < 5 ? "задачи просрочено" : "задач просрочено"}
+            {" "}— требуется внимание
+          </span>
+        </div>
+      )}
+
+      {/* Стат-карточки */}
       <div className="stats-grid">
-        {cards.map(({ key, label, icon: Icon }) => (
-          <div className="stat-card" key={key}>
-            <Icon size={22} />
+        {cards.map(({ key, label, icon: Icon, color }) => (
+          <div className={`stat-card ${color}`} key={key}>
+            <Icon size={20} />
             <span>{label}</span>
-            <strong>{summary ? summary[key] : "-"}</strong>
+            <strong>{summary ? summary[key] : "–"}</strong>
           </div>
         ))}
       </div>
 
+      {/* Прогресс + статусы */}
       <div className="overview-grid">
         <div className="summary-panel">
           <h3>Общий прогресс</h3>
@@ -99,12 +120,55 @@ export function Dashboard() {
             </div>
             <div>
               <span>Просрочено</span>
-              <strong>{summary?.overdueTasks ?? 0}</strong>
+              <strong style={{ color: summary?.overdueTasks ? "#d62860" : undefined }}>
+                {summary?.overdueTasks ?? 0}
+              </strong>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Ближайшие дедлайны */}
+      {upcoming.length > 0 && (
+        <div className="summary-panel">
+          <h3>
+            <CalendarDays size={13} style={{ display: "inline", marginRight: 6, verticalAlign: "middle" }} />
+            Ближайшие дедлайны (7 дней)
+          </h3>
+          <div className="upcoming-list">
+            {upcoming.map((task) => {
+              const daysLeft = daysUntilDeadline(task.deadline);
+              const statusView = visibleStatus(task);
+              const urgent = daysLeft !== null && daysLeft <= 2;
+              return (
+                <button
+                  key={task.id}
+                  className="upcoming-item"
+                  onClick={() => onSelectTask(task.id)}
+                >
+                  <div className="upcoming-left">
+                    <span className={`badge ${statusView.toLowerCase()}`} />
+                    <span className="upcoming-title">{task.title}</span>
+                  </div>
+                  <div className="upcoming-right">
+                    <span className="upcoming-assignee">{task.assigneeName}</span>
+                    <span className={`upcoming-days ${urgent ? "urgent" : ""}`}>
+                      {daysLeft === 0
+                        ? "сегодня"
+                        : daysLeft === 1
+                          ? "завтра"
+                          : `${daysLeft} дн.`}
+                    </span>
+                    <span className="upcoming-date">{formatDate(task.deadline)}</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Нагрузка по преподавателям */}
       <div className="table-wrap">
         <h3>Нагрузка по преподавателям</h3>
         <table>
@@ -135,7 +199,13 @@ export function Dashboard() {
                 <td>{item.new}</td>
                 <td>{item.inProgress}</td>
                 <td>{item.done}</td>
-                <td>{item.overdue}</td>
+                <td>
+                  {item.overdue > 0 ? (
+                    <span style={{ color: "#d62860", fontWeight: 700 }}>{item.overdue}</span>
+                  ) : (
+                    item.overdue
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>

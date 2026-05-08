@@ -1,11 +1,17 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Save } from "lucide-react";
 import { api } from "../api/client";
-import type { User } from "../types";
+import type { Priority, User } from "../types";
 
 type Props = {
   onCreated: () => void;
 };
+
+const priorityOptions: { value: Priority; label: string }[] = [
+  { value: "HIGH", label: "🔴 Высокий" },
+  { value: "MEDIUM", label: "🟡 Средний" },
+  { value: "LOW", label: "🟢 Низкий" }
+];
 
 export function TaskForm({ onCreated }: Props) {
   const [teachers, setTeachers] = useState<User[]>([]);
@@ -13,6 +19,7 @@ export function TaskForm({ onCreated }: Props) {
   const [description, setDescription] = useState("");
   const [assigneeId, setAssigneeId] = useState("");
   const [deadline, setDeadline] = useState("");
+  const [priority, setPriority] = useState<Priority>("MEDIUM");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -33,10 +40,11 @@ export function TaskForm({ onCreated }: Props) {
     setLoading(true);
 
     try {
-      await api.createTask({ title, description, assigneeId, deadline });
+      await api.createTask({ title, description, assigneeId, deadline, priority });
       setTitle("");
       setDescription("");
       setDeadline("");
+      setPriority("MEDIUM");
       setMessage("Задача создана");
       onCreated();
     } catch (err) {
@@ -50,6 +58,7 @@ export function TaskForm({ onCreated }: Props) {
     <section className="page-section narrow">
       <div className="section-title">
         <div>
+          <p className="muted small">Новая задача</p>
           <h2>Создать задачу</h2>
         </div>
       </div>
@@ -57,36 +66,51 @@ export function TaskForm({ onCreated }: Props) {
       <form className="form-panel" onSubmit={submit}>
         <label>
           Название
-          <input value={title} onChange={(event) => setTitle(event.target.value)} required />
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Кратко опишите задачу"
+            required
+          />
         </label>
 
         <label>
           Описание
           <textarea
             value={description}
-            onChange={(event) => setDescription(event.target.value)}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Подробности, требования, ссылки..."
             rows={5}
             required
           />
         </label>
 
-        <label>
-          Исполнитель
-          <select value={assigneeId} onChange={(event) => setAssigneeId(event.target.value)} required>
-            {teachers.map((teacher) => (
-              <option value={teacher.id} key={teacher.id}>
-                {teacher.fullName}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="form-row-2">
+          <label>
+            Исполнитель
+            <select value={assigneeId} onChange={(e) => setAssigneeId(e.target.value)} required>
+              {teachers.map((t) => (
+                <option value={t.id} key={t.id}>{t.fullName}</option>
+              ))}
+            </select>
+          </label>
+
+          <label>
+            Приоритет
+            <select value={priority} onChange={(e) => setPriority(e.target.value as Priority)}>
+              {priorityOptions.map((o) => (
+                <option value={o.value} key={o.value}>{o.label}</option>
+              ))}
+            </select>
+          </label>
+        </div>
 
         <label>
           Дедлайн
           <input
             type="date"
             value={deadline}
-            onChange={(event) => setDeadline(event.target.value)}
+            onChange={(e) => setDeadline(e.target.value)}
             required
           />
         </label>
@@ -95,8 +119,8 @@ export function TaskForm({ onCreated }: Props) {
         {message && <div className="success">{message}</div>}
 
         <button className="primary" type="submit" disabled={loading}>
-          <Save size={18} />
-          {loading ? "Сохраняем..." : "Создать"}
+          <Save size={16} />
+          {loading ? "Сохраняем..." : "Создать задачу"}
         </button>
       </form>
     </section>

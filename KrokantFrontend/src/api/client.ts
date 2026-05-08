@@ -1,8 +1,10 @@
 import { mockApi } from "./mockData";
 import type {
   ApiError,
+  Comment,
   DashboardSummary,
   LoginResponse,
+  Priority,
   Task,
   TaskFilters,
   TaskListResponse,
@@ -61,10 +63,7 @@ function params(filters: TaskFilters) {
 
 export const api = {
   login(email: string, password: string): Promise<LoginResponse> {
-    if (USE_MOCKS) {
-      return mockApi.login(email, password);
-    }
-
+    if (USE_MOCKS) return mockApi.login(email, password);
     return request<LoginResponse>("/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password })
@@ -72,26 +71,17 @@ export const api = {
   },
 
   getTeachers(): Promise<User[]> {
-    if (USE_MOCKS) {
-      return mockApi.getTeachers();
-    }
-
+    if (USE_MOCKS) return mockApi.getTeachers();
     return request<User[]>("/users?role=TEACHER");
   },
 
   getTasks(filters: TaskFilters): Promise<TaskListResponse> {
-    if (USE_MOCKS) {
-      return mockApi.getTasks(filters);
-    }
-
+    if (USE_MOCKS) return mockApi.getTasks(filters);
     return request<TaskListResponse>(`/tasks${params(filters)}`);
   },
 
   getTask(id: string): Promise<Task> {
-    if (USE_MOCKS) {
-      return mockApi.getTask(id);
-    }
-
+    if (USE_MOCKS) return mockApi.getTask(id);
     return request<Task>(`/tasks/${id}`);
   },
 
@@ -100,11 +90,9 @@ export const api = {
     description: string;
     assigneeId: string;
     deadline: string;
+    priority: Priority;
   }): Promise<Task> {
-    if (USE_MOCKS) {
-      return mockApi.createTask(data);
-    }
-
+    if (USE_MOCKS) return mockApi.createTask(data);
     return request<Task>("/tasks", {
       method: "POST",
       body: JSON.stringify(data)
@@ -113,12 +101,9 @@ export const api = {
 
   updateTask(
     id: string,
-    data: Partial<Pick<Task, "title" | "description" | "assigneeId" | "deadline">>
+    data: Partial<Pick<Task, "title" | "description" | "assigneeId" | "deadline" | "priority">>
   ): Promise<Task> {
-    if (USE_MOCKS) {
-      return mockApi.updateTask(id, data);
-    }
-
+    if (USE_MOCKS) return mockApi.updateTask(id, data);
     return request<Task>(`/tasks/${id}`, {
       method: "PATCH",
       body: JSON.stringify(data)
@@ -126,10 +111,7 @@ export const api = {
   },
 
   changeStatus(id: string, status: TaskStatus) {
-    if (USE_MOCKS) {
-      return mockApi.changeStatus(id, status);
-    }
-
+    if (USE_MOCKS) return mockApi.changeStatus(id, status);
     return request<{ id: string; status: TaskStatus; updatedAt: string }>(`/tasks/${id}/status`, {
       method: "PATCH",
       body: JSON.stringify({ status })
@@ -137,29 +119,33 @@ export const api = {
   },
 
   changeDeadline(id: string, deadline: string, comment: string) {
-    if (USE_MOCKS) {
-      return mockApi.changeDeadline(id, deadline);
-    }
-
+    if (USE_MOCKS) return mockApi.changeDeadline(id, deadline, comment);
     return request<{ id: string; deadline: string; updatedAt: string }>(`/tasks/${id}/deadline`, {
       method: "PATCH",
       body: JSON.stringify({ deadline, comment })
     });
   },
 
-  getSummary(): Promise<DashboardSummary> {
-    if (USE_MOCKS) {
-      return mockApi.getSummary();
-    }
+  addComment(taskId: string, text: string): Promise<Comment> {
+    if (USE_MOCKS) return mockApi.addComment(taskId, text);
+    return request<Comment>(`/tasks/${taskId}/comments`, {
+      method: "POST",
+      body: JSON.stringify({ text })
+    });
+  },
 
+  getSummary(): Promise<DashboardSummary> {
+    if (USE_MOCKS) return mockApi.getSummary();
     return request<DashboardSummary>("/dashboard/summary");
   },
 
   getWorkload(): Promise<WorkloadItem[]> {
-    if (USE_MOCKS) {
-      return mockApi.getWorkload();
-    }
-
+    if (USE_MOCKS) return mockApi.getWorkload();
     return request<WorkloadItem[]>("/dashboard/workload");
+  },
+
+  getUpcoming(days = 7): Promise<Task[]> {
+    if (USE_MOCKS) return mockApi.getUpcoming(days);
+    return request<Task[]>(`/tasks/upcoming?days=${days}`);
   }
 };
