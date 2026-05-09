@@ -3,16 +3,18 @@ import { Search, SlidersHorizontal } from "lucide-react";
 import { api } from "../api/client";
 import type { Priority, Task, TaskFilters, User } from "../types";
 import {
-    daysUntilDeadline,
-    formatDate,
-    statusLabels,
-    visibleStatus
+  daysUntilDeadline,
+  deadlineProgress,
+  formatDate,
+  statusLabels,
+  taskProgress,
+  visibleStatus
 } from "../utils/status";
 
 type Props = {
-    currentUser: User;
-    refreshKey: number;
-    onSelectTask: (id: string) => void;
+  currentUser: User;
+  refreshKey: number;
+  onSelectTask: (id: string) => void;
 };
 
 const priorityLabel: Record<Priority, string> = {
