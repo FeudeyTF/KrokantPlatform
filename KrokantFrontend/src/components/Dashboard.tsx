@@ -22,15 +22,14 @@ export function Dashboard({ onSelectTask }: Props) {
   const [upcoming, setUpcoming] = useState<Task[]>([]);
   const [error, setError] = useState("");
 
-  const donePercent = summary?.totalTasks
-    ? Math.round((summary.doneTasks / summary.totalTasks) * 100)
-    : 0;
-  const activePercent = summary?.totalTasks
-    ? Math.round((summary.inProgressTasks / summary.totalTasks) * 100)
-    : 0;
-  const riskPercent = summary?.totalTasks
-    ? Math.round((summary.overdueTasks / summary.totalTasks) * 100)
-    : 0;
+    useEffect(() => {
+        Promise.all([api.getSummary(), api.getWorkload()])
+            .then(([summaryData, workloadData]) => {
+                setSummary(summaryData);
+                setWorkload(workloadData);
+            })
+            .catch((err) => setError(err instanceof Error ? err.message : "Ошибка загрузки"));
+    }, []);
 
   useEffect(() => {
     Promise.all([api.getSummary(), api.getWorkload(), api.getUpcoming(7)])
@@ -42,18 +41,17 @@ export function Dashboard({ onSelectTask }: Props) {
       .catch((err) => setError(err instanceof Error ? err.message : "Ошибка загрузки"));
   }, []);
 
-  if (error) {
-    return <div className="error">{error}</div>;
-  }
+    return (
+        <section className="page-section">
+            <div className="section-title">
+                <div>
+                    <p className="muted small">Общая картина по задачам</p>
+                    <h2>Панель управления</h2>
+                </div>
+            </div>
 
-  return (
-    <section className="page-section">
-      <div className="section-title">
-        <div>
-          <p className="muted small">Общая картина</p>
-          <h2>Dashboard</h2>
-        </div>
-      </div>
+            <div className="summary-panel dashboard-summary-panel">
+                <h3>Сводка по задачам</h3>
 
       {/* Алерт о просрочках */}
       {summary && summary.overdueTasks > 0 && (

@@ -9,7 +9,7 @@
 }
 
 * {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 body {
@@ -23,11 +23,11 @@ button,
 input,
 select,
 textarea {
-  font: inherit;
+    font: inherit;
 }
 
 button {
-  cursor: pointer;
+    cursor: pointer;
 }
 
 button:disabled {
@@ -64,7 +64,7 @@ h3 {
 
 /* ═══════════════ APP SHELL ═══════════════ */
 .app {
-  min-height: 100vh;
+    min-height: 100vh;
 }
 
 /* ═══════════════ TOPBAR ═══════════════ */
@@ -164,6 +164,11 @@ h3 {
   background: #d820a0;
 }
 
+    .primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 34px rgba(233, 45, 172, 0.25);
+    }
+
 .secondary {
   padding: 0 14px;
   color: #c4a8e0;
@@ -209,10 +214,10 @@ h3 {
   border-left: 1px solid rgba(255, 255, 255, 0.07);
 }
 
-.user-box span,
-.user-box strong {
-  display: block;
-}
+    .user-box span,
+    .user-box strong {
+        display: block;
+    }
 
 .user-box span {
   font-size: 13px;
@@ -246,9 +251,9 @@ h3 {
 }
 
 .section-title {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 /* ═══════════════ TYPOGRAPHY ═══════════════ */
@@ -303,7 +308,6 @@ h3 {
 
 /* ═══════════════ PANELS ═══════════════ */
 .form-panel,
-.table-wrap,
 .details-head,
 .summary-panel {
   padding: 22px;
@@ -344,7 +348,8 @@ textarea::placeholder {
 }
 
 textarea {
-  resize: vertical;
+    min-height: 140px;
+    resize: vertical;
 }
 
 input:focus,
@@ -476,11 +481,10 @@ td {
   gap: 16px;
 }
 
-.progress-list,
-.detail-progress {
-  display: grid;
-  gap: 16px;
-}
+    .dashboard-summary-icon.total {
+        color: #1b0a2f;
+        background: var(--accent-yellow);
+    }
 
 .progress-row {
   display: grid;
@@ -571,12 +575,9 @@ td {
   border-radius: 999px;
 }
 
-.mini-progress span {
-  display: block;
-  height: 100%;
-  background: linear-gradient(90deg, #a7ff45, #ff55c7);
-  border-radius: inherit;
-}
+    .task-card-body p {
+        margin-bottom: 0;
+    }
 
 /* ═══════════════ FILTERS ═══════════════ */
 .filters {
@@ -590,9 +591,10 @@ td {
   border-radius: 11px;
 }
 
-.filters label {
-  margin-bottom: 0;
-}
+    .task-deadline-note.danger {
+        color: #ffffff;
+        background: var(--accent-danger);
+    }
 
 .filter-actions {
   display: flex;
@@ -663,6 +665,7 @@ td {
   gap: 5px;
 }
 
+.progress-row,
 .task-progress-row {
   display: flex;
   justify-content: space-between;
@@ -1176,3 +1179,13 @@ td {
     padding: 20px 0 48px;
   }
 }
+
+.workload-teacher {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+    .workload-teacher svg {
+        color: var(--accent-green);
+    }
