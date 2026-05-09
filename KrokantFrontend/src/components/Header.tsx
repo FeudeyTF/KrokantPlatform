@@ -11,7 +11,7 @@ type Props = {
 export function Header({ user, page, onNavigate, onLogout }: Props) {
   return (
     <header className="topbar">
-      <div>
+      <div className="topbar-brand">
         <p className="muted small">Мониторинг задач</p>
         <h1>Krokant Platform</h1>
       </div>
@@ -23,7 +23,7 @@ export function Header({ user, page, onNavigate, onLogout }: Props) {
             onClick={() => onNavigate("dashboard")}
             title="Сводка"
           >
-            <BarChart3 size={18} />
+            <BarChart3 size={16} />
             Dashboard
           </button>
         )}
@@ -32,7 +32,7 @@ export function Header({ user, page, onNavigate, onLogout }: Props) {
           onClick={() => onNavigate("tasks")}
           title="Задачи"
         >
-          <ClipboardList size={18} />
+          <ClipboardList size={16} />
           Задачи
         </button>
         {user.role === "HEAD" && (
@@ -41,7 +41,7 @@ export function Header({ user, page, onNavigate, onLogout }: Props) {
             onClick={() => onNavigate("create")}
             title="Создать задачу"
           >
-            <Plus size={18} />
+            <Plus size={16} />
             Создать
           </button>
         )}
@@ -51,7 +51,7 @@ export function Header({ user, page, onNavigate, onLogout }: Props) {
         <span>{user.fullName}</span>
         <strong>{user.role === "HEAD" ? "Руководитель" : "Преподаватель"}</strong>
         <button className="icon-button" onClick={onLogout} title="Выйти">
-          <LogOut size={18} />
+          <LogOut size={16} />
         </button>
       </div>
     </header>

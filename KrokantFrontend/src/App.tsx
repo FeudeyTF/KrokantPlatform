@@ -51,7 +51,11 @@ function App() {
   }
 
   function refreshTasks() {
-    setRefreshKey((value) => value + 1);
+    setRefreshKey((v) => v + 1);
+  }
+
+  function openTask(id: string) {
+    setSelectedTaskId(id);
   }
 
   if (!user) {
@@ -72,12 +76,14 @@ function App() {
           />
         ) : (
           <>
-            {page === "dashboard" && user.role === "HEAD" && <Dashboard />}
+            {page === "dashboard" && user.role === "HEAD" && (
+              <Dashboard onSelectTask={openTask} />
+            )}
             {page === "tasks" && (
               <TaskList
                 currentUser={user}
                 refreshKey={refreshKey}
-                onSelectTask={setSelectedTaskId}
+                onSelectTask={openTask}
               />
             )}
             {page === "create" && user.role === "HEAD" && (
