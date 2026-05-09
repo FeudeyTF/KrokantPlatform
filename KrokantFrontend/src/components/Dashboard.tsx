@@ -211,7 +211,6 @@ export function Dashboard({ onSelectTask }: Props) {
 						</tbody>
 					</table>
 				</div>
-			</div>
 		</section>
 	);
 }
