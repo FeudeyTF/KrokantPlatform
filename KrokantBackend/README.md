@@ -4,7 +4,7 @@ ASP.NET Core Web API for educational task management (SQLite, EF Core, JWT).
 
 # Requirements
 
-.NET 10 SDK
+.NET 9
 
 # Start
 
