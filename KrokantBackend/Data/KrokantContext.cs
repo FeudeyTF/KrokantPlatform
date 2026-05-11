@@ -9,6 +9,10 @@ namespace KrokantBackend.Data
 
         public DbSet<TaskItem> Tasks { get; set; }
 
+        public DbSet<TaskComment> TaskComments { get; set; }
+
+        public DbSet<TaskActivity> TaskActivities { get; set; }
+
         public KrokantContext(DbContextOptions<KrokantContext> options) : base(options)
         {
         }
@@ -17,6 +21,24 @@ namespace KrokantBackend.Data
         {
             modelBuilder.Entity<User>().HasKey(u => u.Id);
             modelBuilder.Entity<TaskItem>().HasKey(t => t.Id);
+            modelBuilder.Entity<TaskComment>().HasKey(c => c.Id);
+            modelBuilder.Entity<TaskActivity>().HasKey(a => a.Id);
+
+            modelBuilder.Entity<TaskItem>()
+                .Property(t => t.Priority)
+                .HasDefaultValue(TaskPriority.MEDIUM);
+
+            modelBuilder.Entity<TaskItem>()
+                .HasMany(t => t.Comments)
+                .WithOne(c => c.Task)
+                .HasForeignKey(c => c.TaskId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<TaskItem>()
+                .HasMany(t => t.Activities)
+                .WithOne(a => a.Task)
+                .HasForeignKey(a => a.TaskId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 
@@ -39,6 +61,7 @@ namespace KrokantBackend.Data
                 Title = "Организация практики",
                 Description = "Согласовать практику",
                 Status = TaskStatus.IN_PROGRESS,
+                Priority = TaskPriority.HIGH,
                 Deadline = DateTime.Parse("2026-05-10"),
                 Assignee = t1,
                 CreatedBy = head,
@@ -47,6 +70,14 @@ namespace KrokantBackend.Data
             };
 
             db.Tasks.Add(task1);
+            db.TaskActivities.Add(new TaskActivity
+            {
+                Id = "activity_1",
+                Task = task1,
+                ActorName = head.FullName,
+                Action = "Task created",
+                CreatedAt = task1.CreatedAt
+            });
             db.SaveChanges();
         }
     }
