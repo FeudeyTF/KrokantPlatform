@@ -1,4 +1,5 @@
 using KrokantBackend.Models;
+using KrokantBackend.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace KrokantBackend.Data
@@ -44,14 +45,14 @@ namespace KrokantBackend.Data
 
     public static class DbSeeder
     {
-        public static void Seed(KrokantContext db)
+        public static void Seed(KrokantContext db, PasswordHasherService passwordHasher)
         {
             if (db.Users.Any())
                 return;
 
-            User head = new() { Id = "u1", FullName = "Иван", Email = "head@spbstu.ru", Password = "123456", Role = UserRole.HEAD };
-            User t1 = new() { Id = "t1", FullName = "Анна", Email = "anna@spbstu.ru", Password = "pass1", Role = UserRole.TEACHER };
-            User t2 = new() { Id = "t2", FullName = "Олег", Email = "oleg@spbstu.ru", Password = "pass2", Role = UserRole.TEACHER };
+            User head = new() { Id = "u1", FullName = "Иван", Email = "head@spbstu.ru", Password = passwordHasher.HashPassword("123456"), Role = UserRole.HEAD };
+            User t1 = new() { Id = "t1", FullName = "Анна", Email = "anna@spbstu.ru", Password = passwordHasher.HashPassword("pass1"), Role = UserRole.TEACHER };
+            User t2 = new() { Id = "t2", FullName = "Олег", Email = "oleg@spbstu.ru", Password = passwordHasher.HashPassword("pass2"), Role = UserRole.TEACHER };
 
             db.Users.AddRange(head, t1, t2);
 

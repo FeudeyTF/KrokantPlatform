@@ -11,19 +11,21 @@ namespace KrokantBackend.Controllers
         private readonly KrokantContext _context;
 
         private readonly JwtService _jwt;
+        private readonly PasswordHasherService _passwordHasher;
 
-        public AuthController(KrokantContext context, JwtService jwt)
+        public AuthController(KrokantContext context, JwtService jwt, PasswordHasherService passwordHasher)
         {
             _context = context;
             _jwt = jwt;
+            _passwordHasher = passwordHasher;
         }
 
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest request)
         {
-            var user = _context.Users.SingleOrDefault(u => u.Email == request.Email && u.Password == request.Password);
+            var user = _context.Users.SingleOrDefault(u => u.Email == request.Email);
 
-            if (user == null)
+            if (user == null || !_passwordHasher.VerifyPassword(user.Password, request.Password))
                 return Unauthorized(new { error = new { code = "UNAUTHORIZED", message = "Invalid credentials" } });
 
             var token = _jwt.GenerateToken(user);
